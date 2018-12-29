@@ -14,8 +14,9 @@ contract Football {
     uint256 public common_card_price ;
     uint256 public vip_card_price;
     uint256 public power_price;
-    mapping(uint256=>card) public card_map;
-    struct card {
+    mapping(uint256=>Card) public card_map;
+    mapping(address=>User) public user_map;
+    struct Card {
         uint256  card_id;
         address  owner;
         uint256  player_id;
@@ -23,15 +24,19 @@ contract Football {
         bool  on_market;
     }
 
-    struct user {
+    struct User {
+        address user_address;
         bool user_free;
         uint256 user_card_cnt;
         uint256[] card_list;
         uint256 last_time;
         uint256 power;
+        uint256 user_contest_cnt;
+        Contest[] contest_list;
+        uint256[5] team;
     }
 
-    struct contest {
+    struct Contest {
         address my_address;
         address challenger_address;
         uint256 my_score;
@@ -146,7 +151,14 @@ contract Football {
         power_price = price;
     }
 
-    function user_login() public {
-     
+    function user_login() public view returns(address,bool,uint256,uint256,uint256,uint256){
+        //address user_from = msg.sender;
+        //User memory user = user_map[user_from];
+        // if (user.user_address == address(0)){
+        //     return (msg.sender,false,0,0,0,0);
+        // }
+        return (address(0),false,0,0,0,0);
+   
+        //return (user.user_address,user.user_free,user.user_card_cnt,user.last_time,user.power,user.user_contest_cnt);
     }
 }
