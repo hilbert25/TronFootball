@@ -2,7 +2,6 @@ const util = require('./util.js');
 const data = require('./data.js');
 var football = artifacts.require("Football");
 contract("football", function(accounts) {
-    let hello;
     async function deployContract() {
         football = await football.new();
     }
@@ -10,14 +9,23 @@ contract("football", function(accounts) {
         return new Promise((resolve) => setTimeout(resolve, time));
     }
 
-    describe("user\n----------", function() {
+    describe("test login and register", function() {
         before(deployContract);
-        it("test user_login",async function() {
-            var res = await football.user_login();
-            console.log(res);
+        it("test logiin" ,async function(){
+            var user = await football.user_login();
+            console.log("login",user);
         })
-    });
-
+        it("test register" ,async function(){
+            await football.user_register();
+            var user = await football.user_login();
+            var user_count = await football.get_user_count();
+            var user_id = await football.get_user_id();
+            console.log("user_id",user_id);
+            console.log("user count",user_count);
+            console.log("register",user);
+        })
+        
+    })
     describe("random\n----------", function(){
        // before(deployContract);
         // it("test goalkeeper card",async function() {

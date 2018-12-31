@@ -1,3 +1,6 @@
+/**
+    不写注释的 jj.length-=18cm
+ */
 pragma solidity >=0.4.21;
 
 contract Football {
@@ -10,13 +13,27 @@ contract Football {
     uint256 public cardMap_cnt;
     uint256 public power_count;
     uint256 public matchMap_cnt;
-    uint256 public saleCardMap_cnt ;
-    uint256 public common_card_price ;
+    uint256 public saleCardMap_cnt;
+    uint256 public common_card_price;
     uint256 public vip_card_price;
     uint256 public power_price;
-    mapping(uint256=>Card) public card_map;
-    mapping(address=>User) public user_map;
-    struct Card {
+
+    mapping(uint256=>uint256) public card_map;//根据卡牌id找卡牌id，这个数据结构没什么卵用
+    mapping(uint256=>uint256) public user_map;//根据玩家address找玩家id
+    mapping(uint256=>uint256) public contest_map;//根据比赛id找卡牌id，这个数据结构没什么卵用
+    
+    Card[] public card_list;//游戏中全部卡牌，索引即id
+    User[] public user_list;//游戏中全部玩家，索引即id
+    Contest[] public contest_list;//游戏中全部比赛，索引即id
+
+
+    mapping(address=>uint256[]) public user_contest_map;//某个玩家的比赛记录,返回比赛记录的id
+    mapping(address=>uint256[]) public user_card_map;//某个玩家的全部卡牌，返回卡牌的id
+    mapping(address=>uint256[]) public user_team_map;//某个玩家的当前队伍，返回队伍中card的id
+    mapping(uint256=>uint256[]) public onmarket_map;//转会市场在售卡牌
+
+    //卡牌：id，所有者，球员id，胜场数（用于计算属性），是否在售
+    struct Card { 
         uint256  card_id;
         address  owner;
         uint256  player_id;
@@ -24,18 +41,17 @@ contract Football {
         bool  on_market;
     }
 
+    //用户信息：地址，是否抽过免费卡(默认true），卡数量，卡list,上次登录时间，体力值，比赛数，比赛列表，球队成员
     struct User {
         address user_address;
         bool user_free;
-        uint256 user_card_cnt;
-        uint256[] card_list;
         uint256 last_time;
         uint256 power;
+        uint256 user_card_cnt;
         uint256 user_contest_cnt;
-        Contest[] contest_list;
-        uint256[5] team;
     }
 
+    //比赛：我的地址，挑战者地址，我的分数，对方分数，成长值
     struct Contest {
         address my_address;
         address challenger_address;
@@ -43,6 +59,7 @@ contract Football {
         uint256 challenger_score;
         uint256 team_point;
     }
+
     constructor() public{
         admin = msg.sender;
         userMap_cnt = 1;
@@ -56,9 +73,13 @@ contract Football {
         common_card_price = 3;
         vip_card_price = 1;
         power_price = 1;
+        User memory user = User(address(0),true,now,0,0,0);
+        user_list.push(user);
+            
     }
      
-    function random(uint256 begin,uint256 end) public view returns(uint256) {//[)
+    //生成随机数，左闭右开
+    function random(uint256 begin,uint256 end) public view returns(uint256) {
         uint256 number = uint256(keccak256(abi.encodePacked(abi.encodePacked(now),msg.sender,block.difficulty))) % (end-begin);
         return number+begin;
     }
@@ -116,23 +137,23 @@ contract Football {
         return uint256(random(1,219));
     }
 
-    function get_admin() public returns(address) {
+    function get_admin() public view returns(address) {
         return admin;
     }
 
-    function get_card_id(uint256 card_id) public returns(uint256) {
-        return card_map[card_id].card_id;
+    function get_card_id(uint256 card_id) public view returns(uint256) {
+        return card_map[card_id];
     }
     
-    function get_common_card_price() public returns(uint256) {
+    function get_common_card_price() public view returns(uint256) {
         return common_card_price;
     }
     
-    function get_vip_card_price() public returns(uint256) {
+    function get_vip_card_price() public view returns(uint256) {
         return vip_card_price;
     }
 
-    function get_power_price() public returns(uint256) {
+    function get_power_price() public view returns(uint256) {
         return power_price;
     }
 
@@ -151,14 +172,32 @@ contract Football {
         power_price = price;
     }
 
+    //用户登录，如果没注册则返回地址空，需要去注册
     function user_login() public view returns(address,bool,uint256,uint256,uint256,uint256){
-        //address user_from = msg.sender;
-        //User memory user = user_map[user_from];
-        // if (user.user_address == address(0)){
-        //     return (msg.sender,false,0,0,0,0);
-        // }
-        return (address(0),false,0,0,0,0);
-   
-        //return (user.user_address,user.user_free,user.user_card_cnt,user.last_time,user.power,user.user_contest_cnt);
+        address user_from = msg.sender;
+        uint256 user_id = user_map[uint256(user_from)];
+        if (user_id == 0){
+            return (msg.sender,false,0,0,0,0);
+        }
+        User memory user = user_list[user_id];
+        return (user.user_address,user.user_free,user.user_card_cnt,user.last_time,user.power,user.user_contest_cnt);
+     }
+
+    function get_user_id() public view returns(uint256) {
+        return user_map[uint256(msg.sender)];
+    }
+
+    function get_user_count() public view returns(uint256) {
+        return user_list.length;
+    }
+    // 用户注册
+    function user_register() public {
+        address user_from = msg.sender;
+        uint256 user_id = user_map[uint256(user_from)];
+        if (user_id == 0){
+            User memory user = User(user_from,true,now,5,0,0);
+            user_list.push(user);
+            user_map[uint256(user_from)] = 1;
+        }
     }
 }
