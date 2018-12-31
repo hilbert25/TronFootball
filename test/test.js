@@ -9,23 +9,46 @@ contract("football", function(accounts) {
         return new Promise((resolve) => setTimeout(resolve, time));
     }
 
-    describe("test login and register", function() {
+    describe("test admin", function() {
         before(deployContract);
-        it("test logiin" ,async function(){
+        it("test admin" ,async function(){
+            var admin = await football.get_admin();
+            console.log("admin",admin);
+        })
+    })
+
+    describe("test login and register", function() {
+        it("test login" ,async function(){
             var user = await football.user_login();
             console.log("login",user);
         })
         it("test register" ,async function(){
             await football.user_register();
+        })
+
+        it("test login again" ,async function(){
             var user = await football.user_login();
-            var user_count = await football.get_user_count();
-            var user_id = await football.get_user_id();
-            console.log("user_id",user_id);
-            console.log("user count",user_count);
-            console.log("register",user);
+            console.log("login",user);
         })
         
     })
+
+
+    describe("test transfer", function() {
+        it("buy power" ,async function(){
+            await football.buy_power(5);
+            var user = await football.user_login();
+            console.log("login",user);
+        })
+    })
+
+    describe("test get team", function() {
+        it("get team" ,async function(){
+            var team = await football.get_user_team(accounts[0]);
+            console.log("login",team);
+        })
+    })
+
     describe("random\n----------", function(){
        // before(deployContract);
         // it("test goalkeeper card",async function() {

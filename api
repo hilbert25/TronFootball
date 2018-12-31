@@ -1,0 +1,11 @@
+用户注册 user_register()
+用户登陆 user_login()
+获取用户id get_user_id()
+获取用户数量 get_user_count()
+购买体力
+购买普通卡
+购买vip卡
+设置球队
+把球员放到市场
+从市场购买球员
+挑战比赛    
