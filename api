@@ -7,9 +7,10 @@ uint256(address)作为用户唯一标识符
 购买体力 buy_power(uint256 value)
 获取用户球队 get_user_team(address user_address)
 获取卡片信息 get_card_info(uint256 card_id)
-判断卡牌是否是vip judge_card_vip(uint256 card_id)
-购买普通卡
-购买vip卡
+判断卡牌是否是 vip judge_card_vip(uint256 card_id)
+购买普通卡 buy_common_card(uint256 value) 
+购买vip卡 buy_vip_card(uint256 value) 
+card是否在队伍中 is_card_in_team(uint256 card_id)
 设置球队
 把球员放到市场
 从市场购买球员

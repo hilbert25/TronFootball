@@ -31,7 +31,7 @@ contract Football {
     mapping(uint256=>uint256[]) public user_team_map;//某个玩家的当前队伍，返回队伍中card的id
     mapping(uint256=>uint256[]) public onmarket_map;//转会市场在售卡牌
 
-     event Transfer(address indexed _from, address indexed _to, uint256 _value);
+    event Transfer(address indexed _from, address indexed _to, uint256 _value);
     //卡牌：id，所有者，球员id，胜场数（用于计算属性），是否在售
     struct Card { 
         uint256  card_id;
@@ -39,6 +39,7 @@ contract Football {
         uint256  player_id;
         uint256  level;
         bool  on_market;
+        uint256 card_price;
     }
 
     //用户信息：地址，是否抽过免费卡(默认true），卡数量，卡list,上次登录时间，体力值，比赛数，比赛列表，球队成员
@@ -74,7 +75,7 @@ contract Football {
         power_price = 1;
         User memory user = User(address(0),now,0,0,0);
         user_list.push(user);
-        Card memory card = Card(0,0,0,0,false);
+        Card memory card = Card(0,0,0,0,false,0);
         card_list.push(card);
             
     }
@@ -185,12 +186,12 @@ contract Football {
             user_map[uint256(user_from)] = user_id;
             uint256[] memory team;
             for(uint256 i=0;i<4;i++) {
-                Card memory card = Card(card_list.length,user_id,random_not_goalkeeper_card(i),0,false);
+                Card memory card = Card(card_list.length,user_id,random_not_goalkeeper_card(i),0,false,0);
                 user_card_map[user_id].push(card_list.length);
                 card_list.push(card);
                 user_team_map[user_id].push(card_list.length-1);
             }
-            Card memory card = Card(card_list.length,user_id,random_goalkeeper_card(4),0,false);
+            Card memory card = Card(card_list.length,user_id,random_goalkeeper_card(4),0,false,0);
             user_card_map[user_id].push(card_list.length);
             card_list.push(card);
             user_team_map[user_id].push(card_list.length-1);
@@ -240,7 +241,7 @@ contract Football {
         for(uint256 i=0;i<temp_card_list.length;i++) {
             user_all_card[i] = temp_card_list[i];
         }
-        return (user_all_card,temp_card_list.length);
+        return (user_all_card,user_card_map[user_id].length);
     }
 
     //购买体力
@@ -255,9 +256,9 @@ contract Football {
     }
     
     //获取卡牌信息
-    function get_card_info(uint256 card_id) public view returns(uint256,uint256,uint256,uint256,bool) {
+    function get_card_info(uint256 card_id) public view returns(uint256,uint256,uint256,uint256,bool,uint256) {
         Card memory card = card_list[card_id];
-        return (card.card_id,card.owner_id,card.player_id,card.level,card.on_market);
+        return (card.card_id,card.owner_id,card.player_id,card.level,card.on_market,card.card_price);
     }
 
     //判断卡牌是不是vip的
@@ -271,7 +272,7 @@ contract Football {
         // require(value >= common_card_price);
         emit Transfer(msg.sender, admin, value);
         uint256 user_id = get_user_id(msg.sender);
-        Card memory card = Card(card_list.length,user_id,random_common_card(),0,false);
+        Card memory card = Card(card_list.length,user_id,random_common_card(),0,false,0);
         user_card_map[user_id].push(card_list.length);
         card_list.push(card);
     }
@@ -281,8 +282,82 @@ contract Football {
         require(value >= vip_card_price);
         emit Transfer(msg.sender, admin, value);
         uint256 user_id = get_user_id(msg.sender);
-        Card memory card = Card(card_list.length,user_id,random_vip_card(),0,false);
+        Card memory card = Card(card_list.length,user_id,random_vip_card(),0,false,0);
         user_card_map[user_id].push(card_list.length);
         card_list.push(card);
+    }
+
+    //更改队伍中的卡片
+    function change_team(uint256 old_card_id, uint256 new_card_id) public {
+        uint256[5] memory user_team = get_user_team(msg.sender);
+        for(uint256 i=0;i<5;i++){
+            if(user_team[i] == old_card_id){
+                user_team[i] = new_card_id;
+                break;
+            }
+        }
+        uint256 user_id = get_user_id(msg.sender);
+        user_team_map[user_id] = user_team;
+    }
+    //card是否在队伍中
+    function is_card_in_team(uint256 card_id) public view returns(bool) {
+        Card memory card = card_list[card_id];
+        uint256 user_id = get_user_id(msg.sender);
+        uint256[] memory user_team = user_team_map[user_id];
+        for(uint256 i=0;i<5;i++){
+            if(user_team[i] == card.card_id){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    //出售一张卡
+    function sale_card(uint256 card_id, uint256 card_price) public {
+        Card memory card = card_list[card_id];
+        uint256 user_id = get_user_id(msg.sender);
+        require(card.owner_id == user_id && !card.on_market && !is_card_in_team(card_id));
+        card_list[card_id].card_price = card_price;
+        card_list[card_id].on_market = true;
+    }
+    
+    // 获取市场上所有在售card
+    function get_all_card_on_market() view public returns(uint256[9999] memory ,uint256 ) {
+        uint256[9999] memory card_on_market;
+        uint256 card_count = 0;
+        for(uint256 i=0;i<card_list.length;i++) {
+            if(card_list[i].on_market) {
+                card_on_market[card_count++] = card_list[i].card_id;
+            }
+        }
+        return (card_on_market,card_count);
+    }
+    //把一张卡从用户的卡牌列表删除
+    function remove_card_from_user_card_map(uint256 card_id) public {
+        uint256 user_id = card_list[card_id].owner_id;
+        uint256 begin = 9999;
+        for(uint i=0;i<user_card_map[user_id].length;i++) {
+            if(user_card_map[user_id][i] == card_id) {
+                begin = i;
+                break;
+            }
+        }
+        for(uint i=begin;i<user_card_map[user_id].length-1;i++) {
+            user_card_map[user_id][i] = user_card_map[user_id][i+1];
+        }
+        user_card_map[user_id].length--;
+    }
+    //买卡
+    function buy_card(uint256 card_id, uint256 value) public payable{
+        Card memory card = card_list[card_id];
+        uint256 user_id = get_user_id(msg.sender);
+        require(card.on_market && card.card_price<=value);
+        address card_owner_address = user_list[user_id].user_address;
+        emit Transfer(msg.sender, card_owner_address, value);//我，中本聪，打钱
+        remove_card_from_user_card_map(card_id);//从原来的owner cardlist中删除
+        user_card_map[user_id].push(card_id);//加到购买者的cardlist中
+        card_list[card_id].owner_id = user_id;//变更所有权
+        card_list[card_id].on_market = false;//下架
+       
     }
 }

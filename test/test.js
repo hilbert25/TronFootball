@@ -26,6 +26,7 @@ contract("football", function(accounts) {
         })
         it("test register" ,async function(){
             await football.user_register();
+            await football.user_register({from:accounts[1]});
         })
 
         it("test login again" ,async function(){
@@ -56,18 +57,54 @@ contract("football", function(accounts) {
                 console.log("vip:",vip);
             }
         })
-        it("buy card " ,async function(){
+        it("氪金 " ,async function(){
             await football.buy_common_card(10);
             await football.buy_vip_card(1);
         })
         it("get_user_all_card" ,async function(){
             var card = await football.get_user_all_card();
-            var card_list = card[0];
-            var card_count = card[1]
-            for(var i=0;i<card_count;i++){
-                console.log(card_list[i]);
+            for(var i=0;i<card[1];i++){
+                console.log(card[0][i]);
             }
         })
+
+        it("change_team" ,async function(){
+            await football.change_team(1,11);
+            var team = await football.get_user_team(accounts[0]);
+            console.log("new team",team);
+        })
+
+        it("sale a card" ,async function(){
+            await football.sale_card(1,6);
+        })
+
+        it("get_all_card_on_market" ,async function(){
+            var card = await football.get_all_card_on_market();
+            for(var i=0;i<card[1];i++){
+                console.log("市场:",card[0][i]);
+            }
+        })
+
+        it("buy card from market " ,async function(){
+            var card_1 = await football.get_user_all_card({from:accounts[1]});
+            for(var i=0;i<card_1[1];i++){
+                console.log("card of user 1",card_1[0][i]);
+            }
+            await football.buy_card(1,7,{from:accounts[1]})
+            var card = await football.get_all_card_on_market();
+            console.log("市场上card数量为",card[1]);
+            var card_0 = await football.get_user_all_card({from:accounts[0]});
+            var card_1 = await football.get_user_all_card({from:accounts[1]});
+            for(var i=0;i<card_0[1];i++){
+                console.log("card of user 0",card_0[0][i]);
+            }
+            for(var i=0;i<card_1[1];i++){
+                console.log("card of user 1",card_1[0][i]);
+            }
+   
+        })
+
+      
 
     })
    
