@@ -14,11 +14,11 @@ contract Football {
     uint256 public power_count;
     uint256 public matchMap_cnt;
     uint256 public saleCardMap_cnt;
-    uint256 public common_card_price;
-    uint256 public vip_card_price;
+    uint256 public common_card_price = 1;
+    uint256 public vip_card_price = 1;
     uint256 public power_price=5;
 
-    mapping(uint256=>uint256) public user_map;//根据玩家address找玩家id
+    mapping(uint256=>uint256) public user_map;//根据玩家address找玩家id，一律用user_id不用address
     mapping(uint256=>uint256) public contest_map;//根据比赛id找卡牌id，这个数据结构没什么卵用
     
     Card[] public card_list;//游戏中全部卡牌，索引即id
@@ -35,7 +35,7 @@ contract Football {
     //卡牌：id，所有者，球员id，胜场数（用于计算属性），是否在售
     struct Card { 
         uint256  card_id;
-        address  owner;
+        uint256  owner_id;
         uint256  player_id;
         uint256  level;
         bool  on_market;
@@ -52,8 +52,8 @@ contract Football {
 
     //比赛：我的地址，挑战者地址，我的分数，对方分数，成长值
     struct Contest {
-        address my_address;
-        address challenger_address;
+        uint256 my_id;
+        uint256 challenger_id;
         uint256 my_score;
         uint256 challenger_score;
         uint256 team_point;
@@ -74,7 +74,7 @@ contract Football {
         power_price = 1;
         User memory user = User(address(0),now,0,0,0);
         user_list.push(user);
-        Card memory card = Card(0,address(0),0,0,false);
+        Card memory card = Card(0,0,0,0,false);
         card_list.push(card);
             
     }
@@ -174,17 +174,46 @@ contract Football {
         power_price = price;
     }
 
+    // 用户注册顺便送卡
+    function user_register() public {
+        address user_from = msg.sender;
+        uint256 user_id = get_user_id(user_from);
+        if (user_id == 0){
+            User memory user = User(user_from,now,5,0,0);
+            user_list.push(user);
+            user_id = user_list.length-1;
+            user_map[uint256(user_from)] = user_id;
+            uint256[] memory team;
+            for(uint256 i=0;i<4;i++) {
+                Card memory card = Card(card_list.length,user_id,random_not_goalkeeper_card(i),0,false);
+                user_card_map[user_id].push(card_list.length);
+                card_list.push(card);
+                user_team_map[user_id].push(card_list.length-1);
+            }
+            Card memory card = Card(card_list.length,user_id,random_goalkeeper_card(4),0,false);
+            user_card_map[user_id].push(card_list.length);
+            card_list.push(card);
+            user_team_map[user_id].push(card_list.length-1);
+        }
+    }
+    
     //用户登录，如果没注册则返回地址空，需要去注册
     function user_login() public view returns(address,uint256,uint256,uint256,uint256){
         address user_from = msg.sender;
-        uint256 user_id = user_map[uint256(user_from)];
+        uint256 user_id = get_user_id(user_from);
         if (user_id == 0){
             return (msg.sender,0,0,0,0);
         }
         User memory user = user_list[user_id];
         return (user.user_address,user.user_card_cnt,user.last_time,user.power,user.user_contest_cnt);
       }
-
+    
+    // 根据user_id获取address
+    function get_user_address(uint256 user_id) public view returns(address) {
+        User memory user = user_list[user_id];
+        return user.user_address;
+      
+    }
     function get_user_id(address user_address) public view returns(uint256) {
         return user_map[uint256(user_address)];
     }
@@ -192,29 +221,8 @@ contract Football {
     function get_user_count() public view returns(uint256) {
         return user_list.length;
     }
-    // 用户注册
-    function user_register() public {
-        address user_from = msg.sender;
-        uint256 user_id = user_map[uint256(user_from)];
-        if (user_id == 0){
-            User memory user = User(user_from,now,5,0,0);
-            user_list.push(user);
-            uint256 user_id = user_list.length-1;
-            user_map[uint256(user_from)] = user_id;
-            uint256[] memory team;
-            for(uint256 i=0;i<4;i++) {
-                Card memory card = Card(card_list.length,msg.sender,random_not_goalkeeper_card(i),0,false);
-                user_card_map[user_id].push(card_list.length);
-                card_list.push(card);
-                user_team_map[user_id].push(card_list.length-1);
-            }
-            Card memory card = Card(card_list.length,msg.sender,random_goalkeeper_card(4),0,false);
-            user_card_map[user_id].push(card_list.length);
-            card_list.push(card);
-            user_team_map[user_id].push(card_list.length-1);
-        }
-    }
     
+    //获取用户的队伍，返回card_id数组
     function get_user_team(address user_address) public view returns(uint256[5] memory) {
         uint256[] storage temp_team =  user_team_map[get_user_id(user_address)];
         uint256[5] memory user_team;
@@ -223,11 +231,58 @@ contract Football {
         }
         return user_team;
     }
+     
+    //获取用户的全部卡牌
+    function get_user_all_card() public view returns(uint256[999] memory ,uint256){
+        uint256 user_id = get_user_id(msg.sender);
+        uint256[] storage temp_card_list = user_card_map[user_id];
+        uint256[999] memory user_all_card;
+        for(uint256 i=0;i<temp_card_list.length;i++) {
+            user_all_card[i] = temp_card_list[i];
+        }
+        return (user_all_card,temp_card_list.length);
+    }
+
+    //购买体力
     function buy_power(uint256 value) public payable{
         require(value > power_price);
+        User memory user = user_list[get_user_id(msg.sender)];
+        //require(now-user.last_time>=86400);
         emit Transfer(msg.sender, admin, value);
         uint256 user_id = user_map[uint256(msg.sender)];
         user_list[user_id].power+=5;
+        user_list[user_id].last_time = now;
+    }
+    
+    //获取卡牌信息
+    function get_card_info(uint256 card_id) public view returns(uint256,uint256,uint256,uint256,bool) {
+        Card memory card = card_list[card_id];
+        return (card.card_id,card.owner_id,card.player_id,card.level,card.on_market);
     }
 
+    //判断卡牌是不是vip的
+    function judge_card_vip(uint256 card_id) public view returns(bool) {
+        Card memory card = card_list[card_id];
+        return card.player_id<=81; 
+    }
+
+    //买一张普通卡
+    function buy_common_card(uint256 value) public payable{
+        // require(value >= common_card_price);
+        emit Transfer(msg.sender, admin, value);
+        uint256 user_id = get_user_id(msg.sender);
+        Card memory card = Card(card_list.length,user_id,random_common_card(),0,false);
+        user_card_map[user_id].push(card_list.length);
+        card_list.push(card);
+    }
+    
+    //买一张vip卡
+    function buy_vip_card(uint256 value) public payable{
+        require(value >= vip_card_price);
+        emit Transfer(msg.sender, admin, value);
+        uint256 user_id = get_user_id(msg.sender);
+        Card memory card = Card(card_list.length,user_id,random_vip_card(),0,false);
+        user_card_map[user_id].push(card_list.length);
+        card_list.push(card);
+    }
 }

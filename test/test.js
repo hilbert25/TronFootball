@@ -5,9 +5,11 @@ contract("football", function(accounts) {
     async function deployContract() {
         football = await football.new();
     }
+
     function sleep (time) {
         return new Promise((resolve) => setTimeout(resolve, time));
     }
+    
 
     describe("test admin", function() {
         before(deployContract);
@@ -17,7 +19,7 @@ contract("football", function(accounts) {
         })
     })
 
-    describe("test login and register", function() {
+    describe("test user", function() {
         it("test login" ,async function(){
             var user = await football.user_login();
             console.log("login",user);
@@ -31,45 +33,42 @@ contract("football", function(accounts) {
             console.log("login",user);
         })
         
-    })
-
-
-    describe("test transfer", function() {
         it("buy power" ,async function(){
             await football.buy_power(5);
             var user = await football.user_login();
-            console.log("login",user);
+            console.log("last time",user[2]);
+            console.log("power",user[3]);
         })
+
     })
 
-    describe("test get team", function() {
+    describe("test card", function() {
+
         it("get team" ,async function(){
             var team = await football.get_user_team(accounts[0]);
-            console.log("login",team);
+            for(var i=0;i<5;i++){
+                var card = await football.get_card_info(team[i]);
+                var player = data.get_player(card[2]);
+                var vip = await football.judge_card_vip(card[0]);
+                console.log("第",i,"个卡牌");
+                console.log("card:",card);
+                console.log("player: ",player);
+                console.log("vip:",vip);
+            }
         })
-    })
+        it("buy card " ,async function(){
+            await football.buy_common_card(10);
+            await football.buy_vip_card(1);
+        })
+        it("get_user_all_card" ,async function(){
+            var card = await football.get_user_all_card();
+            var card_list = card[0];
+            var card_count = card[1]
+            for(var i=0;i<card_count;i++){
+                console.log(card_list[i]);
+            }
+        })
 
-    describe("random\n----------", function(){
-       // before(deployContract);
-        // it("test goalkeeper card",async function() {
-        //     var num = parseInt(await football.random_goalkeeper_card());
-        //     var goalkeeper = data.get_player(num);
-        //     console.log(num+","+goalkeeper);
-        // })
-        // it("test not goalkeeper card",async function() {
-        //     var num = parseInt(await football.random_not_goalkeeper_card());
-        //     var not_goalkeeper_card = data.get_player(num);;
-        //     console.log(num+","+not_goalkeeper_card);
-        // })
-        // it("test vip card",async function() {
-        //     var num = parseInt(await football.random_vip_card());
-        //     var vip_card = data.get_player(num);;
-        //     console.log(num+","+vip_card);
-        // })
-        // it("test common card",async function() {
-        //     var num = parseInt(await football.random_common_card());
-        //     var vip_card = data.get_player(num);;
-        //     console.log(num+","+vip_card);
-        // })
-    });
+    })
+   
 })

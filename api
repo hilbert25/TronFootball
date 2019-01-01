@@ -1,8 +1,13 @@
+uint256(address)作为用户唯一标识符
 用户注册 user_register()
 用户登陆 user_login()
 获取用户id get_user_id()
+获取用户地址 get_user_address(uint256 user_id) 
 获取用户数量 get_user_count()
-购买体力
+购买体力 buy_power(uint256 value)
+获取用户球队 get_user_team(address user_address)
+获取卡片信息 get_card_info(uint256 card_id)
+判断卡牌是否是vip judge_card_vip(uint256 card_id)
 购买普通卡
 购买vip卡
 设置球队
