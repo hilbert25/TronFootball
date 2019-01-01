@@ -11,7 +11,8 @@ uint256(address)作为用户唯一标识符
 购买普通卡 buy_common_card(uint256 value) 
 购买vip卡 buy_vip_card(uint256 value) 
 card是否在队伍中 is_card_in_team(uint256 card_id)
-设置球队
-把球员放到市场
-从市场购买球员
+设置球队 change_team(uint256 old_card_id, uint256 new_card_id)
+把球员放到市场 sale_card(uint256 card_id, uint256 card_price)
+从市场购买球员 buy_card
 挑战比赛    
+获取市场上所有卡 get_all_card_on_market()
