@@ -358,4 +358,9 @@ contract Football {
         card_list[card_id].owner_id = user_id;//变更所有权
         card_list[card_id].on_market = false;//下架
     }
+
+    //add levle
+    function add_level(uint256 card_id, uint256 add) public {
+        card_list[card_id].level+=add;
+    }
 }

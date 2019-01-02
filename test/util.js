@@ -34,6 +34,22 @@ const team_vs =  function(team_a,team_b){
     }
     round_a = 10*(round_a/(round_a+round_b))
     round_b = 10*(round_a/(round_a+round_b))
+    var mark_a = 0;
+    var mark_b = 0;
+    var attack_a = team_a[1].player_attack+team_a[2].player_attack;
+    var attack_b = team_b[1].player_attack+team_b[2].player_attack;
+    var defend_a = team_a[0].player_defend+team_a[3].player_defend+team_a[4].player_defend;
+    var defend_b = team_b[0].player_defend+team_b[3].player_defend+team_b[4].player_defend;
+    for(var i=0;i<round_a;i++) {
+       mark_a=Math.floor(Math.random()*attack_a)>Math.floor(Math.random()*defend_b)?mark_a+1:mark_a;
+    }
+
+    for(var i=0;i<round_a;i++) {
+        mark_b=Math.floor(Math.random()*attack_b)>Math.floor(Math.random()*defend_a)?mark_b+1:mark_b;
+    }
+    var level_a = mark_a>mark_b?(mark_a-mark_b)*(attack_a+attack_b+defend_a+defend_b)/(attack_a+defend_a):0;
+    var level_b = mark_b>mark_a?(mark_b-mark_a)*(attack_a+attack_b+defend_a+defend_b)/(attack_b+defend_b):0;
+    return [mark_a,mark_b,parseInt(level_a),parseInt(level_b)];
 }
 const create_contest_team =  function(team_a,team_b) {
     var res_a = [];

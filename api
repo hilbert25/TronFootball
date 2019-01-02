@@ -13,6 +13,6 @@ uint256(address)作为用户唯一标识符
 card是否在队伍中 is_card_in_team(uint256 card_id)
 设置球队 change_team(uint256 old_card_id, uint256 new_card_id)
 把球员放到市场 sale_card(uint256 card_id, uint256 card_price)
-从市场购买球员 buy_card
-挑战比赛    
+从市场购买球员 buy_card (uint256 card_id, uint256 value)
+挑战比赛   
 获取市场上所有卡 get_all_card_on_market()

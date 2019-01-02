@@ -114,7 +114,13 @@ contract("football", function(accounts) {
                 team_a.push(await football.get_card_info(team_0[i]));
                 team_b.push(await football.get_card_info(team_1[i]));
             }
-            util.team_vs(team_a,team_b);
+            var res = util.team_vs(team_a,team_b);
+            console.log(res[0],":",res[1]);
+            console.log("level add:",res[2],res[3]);
+            for(var i=0;i<5;i++){
+                await football.add_level(team_0[i],res[2]);
+                await football.add_level(team_1[i],res[2]);
+            }
         })
     })
 })
