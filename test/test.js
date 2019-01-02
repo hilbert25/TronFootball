@@ -101,11 +101,21 @@ contract("football", function(accounts) {
             for(var i=0;i<card_1[1];i++){
                 console.log("card of user 1",card_1[0][i]);
             }
-   
-        })
-
-      
-
+        })  
     })
-   
+    describe("test contest", function() {
+        it("test team_vs",async function(){
+            var team_0 = await football.get_user_team(accounts[0]);
+            var team_1 = await football.get_user_team(accounts[1]);
+            //get card id
+            var team_a = [];
+            var team_b = [];
+            for(var i=0;i<5;i++){
+                team_a.push(await football.get_card_info(team_0[i]));
+                team_b.push(await football.get_card_info(team_1[i]));
+            }
+            util.team_vs(team_a,team_b);
+        })
+    })
 })
+  

@@ -184,16 +184,15 @@ contract Football {
             user_list.push(user);
             user_id = user_list.length-1;
             user_map[uint256(user_from)] = user_id;
-            uint256[] memory team;
             for(uint256 i=0;i<4;i++) {
                 Card memory card = Card(card_list.length,user_id,random_not_goalkeeper_card(i),0,false,0);
                 user_card_map[user_id].push(card_list.length);
                 card_list.push(card);
                 user_team_map[user_id].push(card_list.length-1);
             }
-            Card memory card = Card(card_list.length,user_id,random_goalkeeper_card(4),0,false,0);
+            Card memory card2 = Card(card_list.length,user_id,random_goalkeeper_card(4),0,false,0);
             user_card_map[user_id].push(card_list.length);
-            card_list.push(card);
+            card_list.push(card2);
             user_team_map[user_id].push(card_list.length-1);
         }
     }
@@ -342,8 +341,8 @@ contract Football {
                 break;
             }
         }
-        for(uint i=begin;i<user_card_map[user_id].length-1;i++) {
-            user_card_map[user_id][i] = user_card_map[user_id][i+1];
+        for(uint j=begin;j<user_card_map[user_id].length-1;j++) {
+            user_card_map[user_id][j] = user_card_map[user_id][j+1];
         }
         user_card_map[user_id].length--;
     }
@@ -358,6 +357,5 @@ contract Football {
         user_card_map[user_id].push(card_id);//加到购买者的cardlist中
         card_list[card_id].owner_id = user_id;//变更所有权
         card_list[card_id].on_market = false;//下架
-       
     }
 }
