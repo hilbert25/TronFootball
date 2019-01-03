@@ -298,6 +298,14 @@ contract Football {
         uint256 user_id = get_user_id(msg.sender);
         user_team_map[user_id] = user_team;
     }
+    
+    //设置队伍
+    function set_team(uint256[5] new_team) public {
+        uint256 user_id = get_user_id(msg.sender);
+        user_team_map[user_id] = new_team;
+    }
+    
+    
     //card是否在队伍中
     function is_card_in_team(uint256 card_id) public view returns(bool) {
         Card memory card = card_list[card_id];
