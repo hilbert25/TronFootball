@@ -123,5 +123,15 @@ contract("football", function(accounts) {
             }
         })
     })
+
+    describe("test supplement", function() {
+        it("test get all user",async function(){
+            var data = await football.get_all_users();
+            console.log(data[1]);
+            for(var i=0;i<parseInt(data[1]);i++){
+                console.log(data[0][i]);
+            }
+        })
+    })
 })
   

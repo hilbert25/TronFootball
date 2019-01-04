@@ -16,3 +16,5 @@ card是否在队伍中 is_card_in_team(uint256 card_id)
 从市场购买球员 buy_card (uint256 card_id, uint256 value)
 挑战比赛   
 获取市场上所有卡 get_all_card_on_market()
+get free power get_power_power()
+get all users get_all_users()

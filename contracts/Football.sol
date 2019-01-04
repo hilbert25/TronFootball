@@ -206,7 +206,7 @@ contract Football {
         }
         User memory user = user_list[user_id];
         return (user.user_address,user.user_card_cnt,user.last_time,user.power,user.user_contest_cnt);
-      }
+    }
     
     // 根据user_id获取address
     function get_user_address(uint256 user_id) public view returns(address) {
@@ -255,23 +255,22 @@ contract Football {
     }
     
     //get free power
-    function get_power_power() public payable{
+    function get_power_power() public{
         User memory user = user_list[get_user_id(msg.sender)];
         require(now-user.last_time>=86400);
         uint256 user_id = user_map[uint256(msg.sender)];
         user_list[user_id].power+=5;
         user_list[user_id].last_time = now;
     }
-    //get all team
-    function get_all_team() public view returns(uint256[9999] memory,uint256 team_count){
-        uint256[9999] memory all_team;
-        uint256 team_count = 0;
-        for(uint256 i=0;i<card_list.length;i++) {
-            if(card_list[i].on_market) {
-                card_on_market[card_count++] = card_list[i].card_id;
-            }
+    //get all user
+    function get_all_users() public view returns(address[9999] memory,uint256){
+        address[9999] memory all_user_address;
+        uint256 user_count = 0;
+        for(uint256 i=0;i<user_list.length;i++) {
+            all_user_address[i] = user_list[i].user_address;
+            user_count+=1;
         }
-        return (card_on_market,card_count);
+        return (all_user_address,user_count);
     }
     //获取卡牌信息
     function get_card_info(uint256 card_id) public view returns(uint256,uint256,uint256,uint256,bool,uint256) {
