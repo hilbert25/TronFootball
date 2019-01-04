@@ -254,6 +254,25 @@ contract Football {
         user_list[user_id].last_time = now;
     }
     
+    //get free power
+    function get_power_power() public payable{
+        User memory user = user_list[get_user_id(msg.sender)];
+        require(now-user.last_time>=86400);
+        uint256 user_id = user_map[uint256(msg.sender)];
+        user_list[user_id].power+=5;
+        user_list[user_id].last_time = now;
+    }
+    //get all team
+    function get_all_team() public view returns(uint256[9999] memory,uint256 team_count){
+        uint256[9999] memory all_team;
+        uint256 team_count = 0;
+        for(uint256 i=0;i<card_list.length;i++) {
+            if(card_list[i].on_market) {
+                card_on_market[card_count++] = card_list[i].card_id;
+            }
+        }
+        return (card_on_market,card_count);
+    }
     //获取卡牌信息
     function get_card_info(uint256 card_id) public view returns(uint256,uint256,uint256,uint256,bool,uint256) {
         Card memory card = card_list[card_id];
@@ -300,7 +319,7 @@ contract Football {
     }
     
     //设置队伍
-    function set_team(uint256[5] new_team) public {
+    function set_team(uint256[5] memory new_team) public {
         uint256 user_id = get_user_id(msg.sender);
         user_team_map[user_id] = new_team;
     }
