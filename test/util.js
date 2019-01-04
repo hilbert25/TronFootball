@@ -10,17 +10,17 @@ const team_vs =  function(team_a,team_b){
             {
                 card_id:team_a[i][0],
                 player_id:team_a[i][2],
-                player_attack:team_a[i][3]*0.01+player_a.playerAttackValue,
-                player_defend:team_a[i][3]*0.01+player_a.playerDefendValue,
-                player_speed:team_a[i][3]*0.01+player_a.playerSpeedValue
+                player_attack:team_a[i][3]*0.1+player_a.playerAttackValue,
+                player_defend:team_a[i][3]*0.1+player_a.playerDefendValue,
+                player_speed:team_a[i][3]*0.1+player_a.playerSpeedValue
             });
         temp_team_b.push(
             {
                 card_id:team_b[i][0],
                 player_id:team_b[i][2],
-                player_attack:team_b[i][3]*0.01+player_b.playerAttackValue,
-                player_defend:team_b[i][3]*0.01+player_b.playerDefendValue,
-                player_speed:team_b[i][3]*0.01+player_b.playerSpeedValue
+                player_attack:team_b[i][3]*0.1+player_b.playerAttackValue,
+                player_defend:team_b[i][3]*0.1+player_b.playerDefendValue,
+                player_speed:team_b[i][3]*0.1+player_b.playerSpeedValue
             });
     }
     var team = create_contest_team(temp_team_a,temp_team_b);
@@ -119,6 +119,26 @@ const create_contest_team =  function(team_a,team_b) {
     res_b.push(team_b[0]);
     return [res_a,res_b];
  }
+
+const sort_team = function(teams) {
+    return teams.sort(sortByProperty())
+}
+
+function sortByProperty (){
+    function sortfun (obj0,obj1){
+         var value_0 = 0;
+         var value_1 = 1;
+         for(var i=0;i<5;i++) {
+             value_0 += obj0.user_team[0].card_level*0.3+obj0.user_team[0].player_attack+obj0.user_team[0].player_defend+obj0.user_team[0].player_speed;
+             value_1 += obj1.user_team[0].card_level*0.3+obj1.user_team[0].player_attack+obj1.user_team[0].player_defend+obj1.user_team[0].player_speed;
+         }
+         if (value_0 > value_1) return 1
+         else if (value_0 < value_1) return -1
+         else if (value_0 == value_1) return 0
+    }
+    return sortfun
+}
 module.exports = {
-    team_vs
+    team_vs,
+    sort_team
 }

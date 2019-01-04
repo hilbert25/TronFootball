@@ -125,12 +125,45 @@ contract("football", function(accounts) {
     })
 
     describe("test supplement", function() {
-        it("test get all user",async function(){
-            var data = await football.get_all_users();
-            console.log(data[1]);
-            for(var i=0;i<parseInt(data[1]);i++){
-                console.log(data[0][i]);
+        // it("test get all user",async function(){
+        //     var data = await football.get_all_users();
+        //     console.log(data[1]);
+        //     for(var i=0;i<parseInt(data[1]);i++){
+        //         console.log(data[0][i]);
+        //     }
+        // })
+
+        it("test get all team",async function(){
+            var datas = await football.get_all_users();
+            var teams = [];
+            for(var i=1;i<parseInt(datas[1]);i++){
+                var user_team = await football.get_user_team(datas[0][i]);
+                var team = [];
+                for(var j=0;j<5;j++) {
+                    var card_info = await football.get_card_info(user_team[i]);
+                    var player = data.get_player(card_info[2]);
+                    var card = {
+                        card_id:card_info[0],
+                        card_owner:card_info[1],
+                        card_player_id:card_info[2],
+                        card_level:card_info[3],
+                        card_onmarket:card_info[4],
+                        card_price:card_info[5],
+                        player_name:player.playerName,
+                        player_attack:player.playerAttackValue,
+                        player_defend:player.playerDefendValue,
+                        player_speed:player.playerSpeedValue,
+                        player_position:player.playerPosition
+                    }
+                    team.push(card);
+                }
+                teams.push({
+                    user_id:i,
+                    user_address:datas[0][i],
+                    user_team:team
+                })
             }
+            console.log(util.sort_team(teams));
         })
     })
 })
