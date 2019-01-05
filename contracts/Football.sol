@@ -14,8 +14,8 @@ contract Football {
     uint256 public power_count;
     uint256 public matchMap_cnt;
     uint256 public saleCardMap_cnt;
-    uint256 public common_card_price = 1;
-    uint256 public vip_card_price = 1;
+    uint256 public common_card_price = 3000000;
+    uint256 public vip_card_price = 5000000;
     uint256 public power_price=5;
 
     mapping(uint256=>uint256) public user_map;//根据玩家address找玩家id，一律用user_id不用address
@@ -184,16 +184,18 @@ contract Football {
             user_list.push(user);
             user_id = user_list.length-1;
             user_map[uint256(user_from)] = user_id;
+
+            Card memory card2 = Card(card_list.length,user_id,random_goalkeeper_card(4),0,false,0);
+            user_card_map[user_id].push(card_list.length);
+            card_list.push(card2);
+
+            user_team_map[user_id].push(card_list.length-1);
             for(uint256 i=0;i<4;i++) {
                 Card memory card = Card(card_list.length,user_id,random_not_goalkeeper_card(i),0,false,0);
                 user_card_map[user_id].push(card_list.length);
                 card_list.push(card);
                 user_team_map[user_id].push(card_list.length-1);
             }
-            Card memory card2 = Card(card_list.length,user_id,random_goalkeeper_card(4),0,false,0);
-            user_card_map[user_id].push(card_list.length);
-            card_list.push(card2);
-            user_team_map[user_id].push(card_list.length-1);
         }
     }
     
@@ -385,7 +387,7 @@ contract Football {
         card_list[card_id].on_market = false;//下架
     }
 
-    //add levle
+    //add level
     function add_level(uint256 card_id, uint256 add) public {
         card_list[card_id].level+=add;
     }

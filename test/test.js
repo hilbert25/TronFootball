@@ -163,7 +163,7 @@ contract("football", function(accounts) {
                     user_team:team
                 })
             }
-            console.log(util.sort_team(teams));
+        console.log(util.sort_team(teams));
         })
     })
 })
