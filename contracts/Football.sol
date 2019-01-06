@@ -388,7 +388,10 @@ contract Football {
     }
 
     //add level
-    function add_level(uint256 card_id, uint256 add) public {
-        card_list[card_id].level+=add;
+    function add_level(uint256[5] memory team_a, uint256[5] memory team_b , uint256 add_a, uint256 add_b) public {
+        for(uint256 i=0;i<5;i++) {
+            card_list[team_a[i]].level += add_a;
+            card_list[team_b[i]].level += add_b;
+        }
     }
 }
